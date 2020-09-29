@@ -18,13 +18,9 @@ namespace Sol_Demo.Factory
     {
         private readonly ConcurrentDictionary<ConcreteType, Lazy<ISend>> keyValuePairs = new ConcurrentDictionary<ConcreteType, Lazy<ISend>>();
 
-        // using GetAwaiter().GetResult() method
-        //public FactorySend() => this.SetFactoriesAsync().GetAwaiter().GetResult();
+        private readonly Task initializingTask = null;
 
-        // Or
-
-        // using Task.WaitAlll() method
-        public FactorySend() => Task.WaitAll(this.SetFactoriesAsync());
+        public FactorySend() => initializingTask = SetFactoriesAsync();
 
         private Task SetFactoriesAsync()
         {
@@ -35,12 +31,11 @@ namespace Sol_Demo.Factory
             });
         }
 
-        public Task<ISend> ExecuteAsync(ConcreteType concreteType)
+        public async Task<ISend> ExecuteAsync(ConcreteType concreteType)
         {
-            return Task.Run(() =>
-            {
-                return keyValuePairs[concreteType].Value;
-            });
+            await initializingTask;
+
+            return keyValuePairs[concreteType].Value;
         }
     }
 }
